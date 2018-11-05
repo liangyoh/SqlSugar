@@ -158,6 +158,7 @@ namespace SqlSugar
                         column.DecimalDigits = sugarColumn.DecimalDigits;
                         column.OracleSequenceName = sugarColumn.OracleSequenceName;
                         column.IsOnlyIgnoreInsert = sugarColumn.IsOnlyIgnoreInsert;
+                        column.IsEnableUpdateVersionValidation = sugarColumn.IsEnableUpdateVersionValidation;
                     }
                     else
                     {
@@ -175,6 +176,9 @@ namespace SqlSugar
                     var golbalMappingInfo = this.Context.IgnoreColumns.FirstOrDefault(it => it.EntityName.Equals(result.EntityName, StringComparison.CurrentCultureIgnoreCase) && it.PropertyName == column.PropertyName);
                     if (golbalMappingInfo != null)
                         column.IsIgnore = true;
+                }
+                if (this.Context.CurrentConnectionConfig.ConfigureExternalServices != null && this.Context.CurrentConnectionConfig.ConfigureExternalServices.EntityService != null) {
+                    this.Context.CurrentConnectionConfig.ConfigureExternalServices.EntityService(property, column);
                 }
                 result.Columns.Add(column);
             }

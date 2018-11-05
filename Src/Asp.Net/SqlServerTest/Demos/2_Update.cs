@@ -59,7 +59,9 @@ namespace OrmTest.Demo
             //Column is null no update
             db.Updateable(updateObj).Where(true).ExecuteCommand();
 
-
+            //sql
+            db.Updateable(updateObj).Where("id=@x",new { x="1"}).ExecuteCommand();
+            db.Updateable(updateObj).Where("id","=",1).ExecuteCommand();
             var t12 = db.Updateable<School>().AS("Student").UpdateColumns(it => new School() { Name = "jack" }).Where(it => it.Id == 1).ExecuteCommandAsync();
             t12.Wait();
 
@@ -69,6 +71,12 @@ namespace OrmTest.Demo
 
             //update one columns
             var count2 = db.Updateable<Student>().UpdateColumns(it => it.SchoolId == it.SchoolId+1).Where(it => it.Id == it.Id + 1).ExecuteCommand();
+
+            var dt = new Dictionary<string, object>();
+            dt.Add("id", 1);
+            dt.Add("name", null);
+            dt.Add("createTime", DateTime.Now);
+            var t66 = db.Updateable(dt).AS("student").With(SqlWith.UpdLock).ExecuteCommand();
         }
     }
 }

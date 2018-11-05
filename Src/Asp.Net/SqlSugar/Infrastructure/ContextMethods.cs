@@ -278,6 +278,7 @@ namespace SqlSugar
                 newClient.Ado.LogEventStarting = Context.Ado.LogEventStarting;
                 newClient.Ado.LogEventCompleted = Context.Ado.LogEventCompleted;
                 newClient.Ado.ProcessingEventStartingSQL = Context.Ado.ProcessingEventStartingSQL;
+                newClient.QueryFilter = Context.QueryFilter;
             }
             return newClient;
         }
@@ -346,6 +347,9 @@ namespace SqlSugar
                     }
                     string temp = " {0} {1} {2} {3}  ";
                     string parameterName = string.Format("{0}Conditional{1}{2}", sqlBuilder.SqlParameterKeyWord, item.FieldName, index);
+                    if (parameterName.Contains(".")) {
+                        parameterName = parameterName.Replace(".", "_");
+                    }
                     switch (item.ConditionalType)
                     {
                         case ConditionalType.Equal:
@@ -386,6 +390,10 @@ namespace SqlSugar
                             break;
                         case ConditionalType.LikeLeft:
                             builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "LIKE", parameterName);
+                            parameters.Add(new SugarParameter(parameterName, item.FieldValue + "%"));
+                            break;
+                        case ConditionalType.NoLike:
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), " NOT LIKE", parameterName);
                             parameters.Add(new SugarParameter(parameterName, item.FieldValue + "%"));
                             break;
                         case ConditionalType.LikeRight:

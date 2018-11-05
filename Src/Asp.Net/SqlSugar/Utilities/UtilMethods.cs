@@ -14,8 +14,19 @@ namespace SqlSugar
         internal static Type GetUnderType(Type oldType)
         {
             Type type = Nullable.GetUnderlyingType(oldType);
-            return type==null ? oldType : type;
+            return type == null ? oldType : type;
         }
+
+        internal static Type GetRootBaseType(Type entityType)
+        {
+            var baseType = entityType.BaseType;
+            while (baseType != null && baseType.BaseType != UtilConstants.ObjType)
+            {
+                baseType = baseType.BaseType;
+            }
+            return baseType;
+        }
+
 
         internal static Type GetUnderType(PropertyInfo propertyInfo, ref bool isNullable)
         {
@@ -92,5 +103,16 @@ namespace SqlSugar
             action();
             return value;
         }
+
+        internal static object DefaultForType(Type targetType)
+        {
+            return targetType.IsValueType ? Activator.CreateInstance(targetType) : null;
+        }
+
+        internal static Int64  GetLong(byte[] bytes)
+        {
+            return Convert.ToInt64(string.Join("", bytes).PadRight(20, '0'));
+        }
+
     }
 }

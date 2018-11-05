@@ -100,7 +100,7 @@ namespace SqlSugar
         public static TResult AggregateAvg<TResult>(TResult thisValue) { throw new NotSupportedException("Can only be used in expressions"); }
         public static TResult AggregateMin<TResult>(TResult thisValue) { throw new NotSupportedException("Can only be used in expressions"); }
         public static TResult AggregateMax<TResult>(TResult thisValue) { throw new NotSupportedException("Can only be used in expressions"); }
-        public static TResult AggregateCount<TResult>(TResult thisValue) { throw new NotSupportedException("Can only be used in expressions"); }
+        public static int AggregateCount<TResult>(TResult thisValue) { throw new NotSupportedException("Can only be used in expressions"); }
         public static TResult MappingColumn<TResult>(TResult oldColumnName,string newColumnName) { throw new NotSupportedException("Can only be used in expressions"); }
         /// <summary>
         ///Example: new NewT(){name=SqlFunc.GetSelfAndAutoFill(it)}  Generated SQL   it.*
@@ -110,6 +110,7 @@ namespace SqlSugar
         /// <returns></returns>
         public static TResult GetSelfAndAutoFill<TResult>(TResult value) { throw new NotSupportedException("Can only be used in expressions"); }
         public static DateTime GetDate() { throw new NotSupportedException("Can only be used in expressions"); }
+        public static string GetRandom() { throw new NotSupportedException("Can only be used in expressions"); }
         /// <summary>
         /// Subquery
         /// </summary>

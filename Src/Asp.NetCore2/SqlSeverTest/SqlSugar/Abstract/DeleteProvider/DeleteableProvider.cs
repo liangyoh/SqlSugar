@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -62,6 +63,10 @@ namespace SqlSugar
             IsAs = true;
             OldMappingTableList = this.Context.MappingTables;
             this.Context.MappingTables = this.Context.Utilities.TranslateCopy(this.Context.MappingTables);
+            if (this.Context.MappingTables.Any(it => it.EntityName == entityName))
+            {
+                this.Context.MappingTables.Add(this.Context.MappingTables.First(it => it.EntityName == entityName).DbTableName, tableName);
+            }
             this.Context.MappingTables.Add(entityName, tableName);
             return this; ;
         }
@@ -227,6 +232,17 @@ namespace SqlSugar
 
         public IDeleteable<T> In<PkType>(PkType primaryKeyValue)
         {
+            if (typeof(PkType).FullName.IsCollectionsList())
+            {
+                var newValues = new List<object>();
+                foreach (var item in primaryKeyValue as IEnumerable)
+                {
+                    newValues.Add(item);
+                }
+                return In(newValues);
+            }
+
+
             In(new PkType[] { primaryKeyValue });
             return this;
         }

@@ -194,6 +194,17 @@ namespace SqlSugar
             }
             return result;
         }
+
+        public Task<DbResult<bool>> UseTranAsync(Action action)
+        {
+            Task<DbResult<bool>> result = new Task<DbResult<bool>>(() =>
+            {
+                return UseTran(action);
+            });
+            TaskStart(result);
+            return result;
+        }
+
         public DbResult<T> UseTran<T>(Func<T> action)
         {
             var result = new DbResult<T>();
@@ -214,6 +225,17 @@ namespace SqlSugar
             }
             return result;
         }
+
+        public Task<DbResult<T>> UseTranAsync<T>(Func<T> action)
+        {
+            Task<DbResult<T>> result = new Task<DbResult<T>>(() =>
+            {
+                return UseTran(action);
+            });
+            TaskStart(result);
+            return result;
+        }
+
         public void UseStoredProcedure(Action action)
         {
             var oldCommandType = this.CommandType;
@@ -624,6 +646,14 @@ namespace SqlSugar
         #endregion
 
         #region  Helper
+        private void TaskStart<Type>(Task<Type> result)
+        {
+            if (this.Context.CurrentConnectionConfig.IsShardSameThread)
+            {
+                Check.Exception(true, "IsShardSameThread=true can't be used async method");
+            }
+            result.Start();
+        }
         private void ExecuteProcessingSQL(ref string sql, SugarParameter[] parameters)
         {
             var result = this.ProcessingEventStartingSQL(sql, parameters);
@@ -655,7 +685,10 @@ namespace SqlSugar
             {
                 foreach (var outputParameter in parameters.Where(it => it.Direction.IsIn(ParameterDirection.Output, ParameterDirection.InputOutput,ParameterDirection.ReturnValue)))
                 {
-                    var gobalOutputParamter = this.OutputParameters.Single(it => it.ParameterName == outputParameter.ParameterName);
+                    var gobalOutputParamter = this.OutputParameters.FirstOrDefault(it => it.ParameterName == outputParameter.ParameterName);
+                    if (gobalOutputParamter == null) {//Oracle bug
+                        gobalOutputParamter=this.OutputParameters.FirstOrDefault(it => it.ParameterName == outputParameter.ParameterName.TrimStart(outputParameter.ParameterName.First()));
+                    }
                     outputParameter.Value = gobalOutputParamter.Value;
                     this.OutputParameters.Remove(gobalOutputParamter);
                 }
